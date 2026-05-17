@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automation With Hadi</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050810;
+    --panel: #0d1120;
+    --border: #1a2540;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --danger: #ef4444;
+    --glow: 0 0 20px rgba(0,212,255,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ══════════════════════════════
+     LOGIN PAGE
+  ══════════════════════════════ */
+  #loginPage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    background: var(--bg);
+  }
+
+  .login-box {
+    background: var(--panel);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 420px;
+    max-width: 95vw;
+    box-shadow: var(--glow), 0 0 60px rgba(124,58,237,0.15);
+    animation: fadeIn 0.6s ease;
+    position: relative;
+    z-index: 1;
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .login-logo h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: var(--glow);
+  }
+
+  .login-logo p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  .hex-badge {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-family: 'Orbitron', monospace;
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+  }
+
+  .field-group {
+    margin-bottom: 20px;
+  }
+
+  .field-group label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .field-group input {
+    width: 100%;
+    background: rgba(0,212,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+  }
+
+  .field-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(0,212,255,0.2);
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: opacity 0.3s, transform 0.2s;
+    margin-top: 8px;
+  }
+
+  .login-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  .login-error {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid var(--danger);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--danger);
+    margin-top: 16px;
+    display: none;
+    text-align: center;
+  }
+
+  /* ══════════════════════════════
+     MAIN APP
+  ══════════════════════════════ */
+  #mainApp {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    background: rgba(13,17,32,0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    letter-spacing: 1px;
+  }
+
+  .header-logo span { color: var(--text); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent3);
+    box-shadow: 0 0 8px var(--accent3);
+    animation: pulse 2s infinite;
+  }
+
+  .logout-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: var(--muted);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* MAIN LAYOUT */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    margin-bottom: 32px;
+    width: fit-content;
+  }
+
+  .tab {
+    padding: 10px 28px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+
+  .tab.active {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: #fff;
+    box-shadow: 0 0 16px rgba(0,212,255,0.25);
+  }
+
+  /* API KEY BAR */
+  .api-bar {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .api-bar label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .api-bar input {
+    flex: 1;
+    min-width: 200px;
+    background: rgba(0,212,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .api-bar input:focus { border-color: var(--accent); }
+
+  .save-key-btn {
+    padding: 10px 20px;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid var(--accent3);
+    border-radius: 8px;
+    color: var(--accent3);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .save-key-btn:hover { background: rgba(16,185,129,0.25); }
+
+  /* PANELS */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+
+  .panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-title::before {
+    content: '';
+    width: 4px; height: 20px;
+    background: linear-gradient(var(--accent2), var(--accent));
+    border-radius: 2px;
+  }
+
+  /* FORM */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  @media(max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    resize: vertical;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(0,212,255,0.1);
+  }
+
+  .form-group select option { background: var(--panel); }
+
+  /* GENERATE BTN */
+  .gen-btn {
+    padding: 14px 36px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,212,255,0.3); }
+  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .gen-btn .spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .gen-btn.loading .spinner { display: inline-block; }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: rgba(255,255,255,0.05);
+    border-radius: 100px;
+    height: 6px;
+    margin: 16px 0;
+    overflow: hidden;
+    display: none;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 100px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    display: none;
+  }
+
+  /* LOG */
+  .log-box {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--accent3);
+    max-height: 160px;
+    overflow-y: auto;
+    display: none;
+    margin-top: 16px;
+    line-height: 1.8;
+  }
+
+  /* CANVAS / VIDEO OUTPUT */
+  .output-section {
+    display: none;
+    margin-top: 28px;
+  }
+
+  canvas#videoCanvas {
+    width: 100%;
+    max-width: 720px;
+    border-radius: 12px;
+    border: 2px solid var(--accent);
+    box-shadow: var(--glow);
+    display: block;
+    background: #000;
+  }
+
+  .video-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .ctrl-btn.primary {
+    background: rgba(16,185,129,0.15);
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+  .ctrl-btn.primary:hover { background: rgba(16,185,129,0.25); }
+
+  /* IMAGE UPLOAD */
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .upload-area:hover, .upload-area.drag-over {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.04);
+  }
+
+  .upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .upload-icon { font-size: 40px; margin-bottom: 12px; }
+
+  .upload-area h3 {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .upload-area p { color: var(--muted); font-size: 13px; }
+
+  .image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .img-thumb {
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+  }
+
+  .img-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .img-thumb .remove {
+    position: absolute;
+    top: 4px; right: 4px;
+    background: rgba(239,68,68,0.8);
+    border: none;
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .img-thumb:hover .remove { display: flex; }
+
+  /* ALERT */
+  .alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 16px;
+    display: none;
+  }
+  .alert.error { background: rgba(239,68,68,0.1); border: 1px solid var(--danger); color: var(--danger); }
+  .alert.success { background: rgba(16,185,129,0.1); border: 1px solid var(--accent3); color: var(--accent3); }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .fade-in { animation: fadeIn 0.4s ease; }
+
+  /* SLIDE COUNTER */
+  .slide-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--accent);
+    margin-left: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN PAGE ══ -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="hex-badge">H</div>
+      <h1>Automation With Hadi</h1>
+      <p>AI Video Generation Platform</p>
+    </div>
+    <div class="field-group">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username">
+    </div>
+    <div class="field-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">LOGIN →</button>
+    <div class="login-error" id="loginError">❌ Invalid username or password</div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="mainApp">
+  <header>
+    <div class="header-logo">AUTOMATION <span>WITH HADI</span></div>
+    <div class="header-right">
+      <div class="status-dot"></div>
+      <span style="font-size:13px;color:var(--muted)">Online</span>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- API KEY -->
+    <div class="api-bar">
+      <label>🔑 Groq API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="gsk_xxxxxxxxxxxxxxxxxxxx">
+      <button class="save-key-btn" onclick="saveKey()">✓ Save Key</button>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('text')">📝 Text to Video</button>
+      <button class="tab" onclick="switchTab('image')">🖼️ Image to Video</button>
+    </div>
+
+    <!-- ══ TEXT TO VIDEO ══ -->
+    <div id="tabText" class="fade-in">
+      <div class="panel">
+        <div class="panel-title">Text → Video Generator</div>
+
+        <div class="form-row">
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Topic / Description</label>
+            <textarea id="textTopic" rows="3" placeholder="e.g. 'The history of artificial intelligence and how it is changing the world'"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Number of Slides</label>
+            <select id="slideCount">
+              <option value="4">4 Slides</option>
+              <option value="5" selected>5 Slides</option>
+              <option value="6">6 Slides</option>
+              <option value="8">8 Slides</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Seconds Per Slide</label>
+            <select id="slideDuration">
+              <option value="3">3 seconds</option>
+              <option value="4" selected>4 seconds</option>
+              <option value="5">5 seconds</option>
+              <option value="6">6 seconds</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Color Theme</label>
+            <select id="colorTheme">
+              <option value="cyber">Cyber Blue</option>
+              <option value="purple">Deep Purple</option>
+              <option value="green">Matrix Green</option>
+              <option value="orange">Sunset Orange</option>
+              <option value="red">Ruby Red</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Font Style</label>
+            <select id="fontStyle">
+              <option value="orbitron">Orbitron (Futuristic)</option>
+              <option value="rajdhani">Rajdhani (Clean)</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="gen-btn" id="genTextBtn" onclick="generateTextVideo()">
+          <span class="spinner"></span>
+          GENERATE VIDEO
+        </button>
+
+        <div class="progress-label" id="textProgressLabel">Initializing...</div>
+        <div class="progress-bar-wrap" id="textProgressWrap">
+          <div class="progress-bar" id="textProgress"></div>
+        </div>
+        <div class="log-box" id="textLog"></div>
+        <div class="alert" id="textAlert"></div>
+
+        <div class="output-section" id="textOutput">
+          <canvas id="videoCanvas" width="1280" height="720"></canvas>
+          <div class="video-controls">
+            <button class="ctrl-btn" onclick="playVideo()">▶ Play</button>
+            <button class="ctrl-btn" onclick="pauseVideo()">⏸ Pause</button>
+            <button class="ctrl-btn" onclick="restartVideo()">↺ Restart</button>
+            <button class="ctrl-btn primary" onclick="downloadVideo('text')">⬇ Download Video</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ IMAGE TO VIDEO ══ -->
+    <div id="tabImage" style="display:none;" class="fade-in">
+      <div class="panel">
+        <div class="panel-title">Image → Video Generator</div>
+
+        <div class="upload-area" id="uploadArea">
+          <input type="file" id="imageInput" multiple accept="image/*" onchange="handleImages(event)">
+          <div class="upload-icon">📁</div>
+          <h3>Drop Images Here</h3>
+          <p>or click to browse — JPG, PNG, WebP supported</p>
+        </div>
+
+        <div class="image-grid" id="imageGrid"></div>
+
+        <div class="form-row" style="margin-top:20px;">
+          <div class="form-group">
+            <label>Seconds Per Image</label>
+            <select id="imgDuration">
+              <option value="3">3 seconds</option>
+              <option value="4" selected>4 seconds</option>
+              <option value="5">5 seconds</option>
+              <option value="6">6 seconds</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Transition Effect</label>
+            <select id="transitionType">
+              <option value="fade">Fade</option>
+              <option value="slide">Slide</option>
+              <option value="zoom">Zoom In</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label>Caption (Optional — Groq will generate captions if filled)</label>
+            <input type="text" id="imgCaption" placeholder="e.g. 'My travel photos from Paris 2024'">
+          </div>
+        </div>
+
+        <button class="gen-btn" id="genImgBtn" onclick="generateImageVideo()">
+          <span class="spinner"></span>
+          CREATE VIDEO
+        </button>
+
+        <div class="progress-label" id="imgProgressLabel">Initializing...</div>
+        <div class="progress-bar-wrap" id="imgProgressWrap">
+          <div class="progress-bar" id="imgProgress"></div>
+        </div>
+        <div class="log-box" id="imgLog"></div>
+        <div class="alert" id="imgAlert"></div>
+
+        <div class="output-section" id="imgOutput">
+          <canvas id="imgCanvas" width="1280" height="720"></canvas>
+          <div class="video-controls">
+            <button class="ctrl-btn" onclick="playImgVideo()">▶ Play</button>
+            <button class="ctrl-btn" onclick="pauseImgVideo()">⏸ Pause</button>
+            <button class="ctrl-btn" onclick="restartImgVideo()">↺ Restart</button>
+            <button class="ctrl-btn primary" onclick="downloadVideo('image')">⬇ Download Video</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// CREDENTIALS
+// ══════════════════════════════════════
+const USERS = { hadi: 'hadi123', admin: 'automation2024' };
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (USERS[u] && USERS[u] === p) {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    const saved = localStorage.getItem('awh_key');
+    if (saved) document.getElementById('apiKeyInput').value = saved;
+  } else {
+    const err = document.getElementById('loginError');
+    err.style.display = 'block';
+    setTimeout(() => err.style.display = 'none', 3000);
+  }
+}
+
+function doLogout() {
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ══════════════════════════════════════
+// API KEY
+// ══════════════════════════════════════
+function saveKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  localStorage.setItem('awh_key', k);
+  showAlert('textAlert', 'API key saved!', 'success');
+}
+
+function getKey() { return document.getElementById('apiKeyInput').value.trim(); }
+
+// ══════════════════════════════════════
+// TABS
+// ══════════════════════════════════════
+function switchTab(tab) {
+  document.getElementById('tabText').style.display = tab === 'text' ? 'block' : 'none';
+  document.getElementById('tabImage').style.display = tab === 'image' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (tab==='text' && i===0)||(tab==='image' && i===1)));
+}
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'alert ' + type;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function log(logId, msg) {
+  const box = document.getElementById(logId);
+  box.style.display = 'block';
+  box.innerHTML += `<div>> ${msg}</div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+function setProgress(barId, wrapId, labelId, pct, label) {
+  const bar = document.getElementById(barId);
+  const wrap = document.getElementById(wrapId);
+  const lbl = document.getElementById(labelId);
+  wrap.style.display = 'block';
+  lbl.style.display = 'block';
+  bar.style.width = pct + '%';
+  lbl.textContent = label;
+}
+
+// ══════════════════════════════════════
+// THEME COLORS
+// ══════════════════════════════════════
+const themes = {
+  cyber:  { bg: '#050810', bg2: '#0d1120', accent: '#00d4ff', accent2: '#7c3aed', text: '#e2e8f0' },
+  purple: { bg: '#0d0514', bg2: '#160a24', accent: '#c084fc', accent2: '#7c3aed', text: '#f0e6ff' },
+  green:  { bg: '#030d03', bg2: '#061406', accent: '#22c55e', accent2: '#16a34a', text: '#d1fae5' },
+  orange: { bg: '#0f0800', bg2: '#1a0e00', accent: '#fb923c', accent2: '#dc2626', text: '#fef3c7' },
+  red:    { bg: '#0d0202', bg2: '#1a0505', accent: '#f87171', accent2: '#991b1b', text: '#fee2e2' },
+};
+
+// ══════════════════════════════════════
+// GROQ API CALL
+// ══════════════════════════════════════
+async function callGroq(prompt, apiKey) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 2000
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
+
+// ══════════════════════════════════════
+// TEXT → VIDEO LOGIC
+// ══════════════════════════════════════
+let textSlides = [];
+let textAnimFrame = null;
+let textPlaying = false;
+let textCurrentSlide = 0;
+let textSlideStart = 0;
+let textRecorder = null;
+let textChunks = [];
+let textSlideDur = 4;
+let textTheme = 'cyber';
+let textFont = 'Orbitron';
+
+async function generateTextVideo() {
+  const key = getKey();
+  if (!key) { showAlert('textAlert', 'Please enter your Groq API key first!', 'error'); return; }
+  const topic = document.getElementById('textTopic').value.trim();
+  if (!topic) { showAlert('textAlert', 'Please enter a topic!', 'error'); return; }
+
+  const btn = document.getElementById('genTextBtn');
+  btn.disabled = true; btn.classList.add('loading');
+  document.getElementById('textLog').innerHTML = '';
+  document.getElementById('textOutput').style.display = 'none';
+
+  textSlideDur = parseInt(document.getElementById('slideDuration').value);
+  textTheme = document.getElementById('colorTheme').value;
+  textFont = document.getElementById('fontStyle').value === 'orbitron' ? 'Orbitron' : 'Rajdhani';
+  const n = parseInt(document.getElementById('slideCount').value);
+
+  try {
+    setProgress('textProgress', 'textProgressWrap', 'textProgressLabel', 10, 'Connecting to Groq AI...');
+    log('textLog', 'Sending request to Groq API...');
+
+    const prompt = `Create a ${n}-slide video presentation about: "${topic}"
+
+Return ONLY a valid JSON array, no other text, no markdown, no code blocks.
+Format exactly like this:
+[
+  {"title": "Slide Title Here", "body": "Main content for this slide, 2-3 sentences max.", "emoji": "🚀"},
+  ...
+]
+
+Rules:
+- title: short, impactful (max 6 words)
+- body: 2-3 sentences, informative and engaging
+- emoji: relevant emoji for each slide
+- First slide: introduce the topic
+- Last slide: conclusion or call to action
+- Exactly ${n} slides`;
+
+    const raw = await callGroq(prompt, key);
+    log('textLog', 'Response received, parsing slides...');
+    setProgress('textProgress', 'textProgressWrap', 'textProgressLabel', 40, 'Parsing AI response...');
+
+    let cleaned = raw.trim();
+    cleaned = cleaned.replace(/```json\n?/g,'').replace(/```\n?/g,'');
+    const start = cleaned.indexOf('[');
+    const end = cleaned.lastIndexOf(']');
+    if (start === -1 || end === -1) throw new Error('Invalid response format from AI');
+    textSlides = JSON.parse(cleaned.slice(start, end+1));
+
+    log('textLog', `✓ ${textSlides.length} slides generated`);
+    setProgress('textProgress', 'textProgressWrap', 'textProgressLabel', 60, 'Rendering video frames...');
+
+    document.getElementById('textOutput').style.display = 'block';
+    textCurrentSlide = 0;
+    textPlaying = false;
+
+    renderTextSlide(document.getElementById('videoCanvas'), 0);
+    log('textLog', '✓ Video canvas ready!');
+    setProgress('textProgress', 'textProgressWrap', 'textProgressLabel', 100, 'Done! Press Play to watch.');
+    showAlert('textAlert', '✅ Video ready! Press Play or Download.', 'success');
+
+  } catch(e) {
+    log('textLog', '✗ Error: ' + e.message);
+    showAlert('textAlert', '❌ Error: ' + e.message, 'error');
+    setProgress('textProgress', 'textProgressWrap', 'textProgressLabel', 0, '');
+  }
+
+  btn.disabled = false; btn.classList.remove('loading');
+}
+
+function renderTextSlide(canvas, idx, progress = 1) {
+  if (!textSlides[idx]) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const t = themes[textTheme];
+  const slide = textSlides[idx];
+  const total = textSlides.length;
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, t.bg);
+  grad.addColorStop(1, t.bg2);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = t.accent + '18';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 60) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Accent corner lines
+  ctx.strokeStyle = t.accent + '60';
+  ctx.lineWidth = 2;
+  const cs = 60;
+  // top-left
+  ctx.beginPath(); ctx.moveTo(32,32+cs); ctx.lineTo(32,32); ctx.lineTo(32+cs,32); ctx.stroke();
+  // bottom-right
+  ctx.beginPath(); ctx.moveTo(W-32,H-32-cs); ctx.lineTo(W-32,H-32); ctx.lineTo(W-32-cs,H-32); ctx.stroke();
+
+  // Progress dots
+  const dotR = 5, dotGap = 24;
+  const totalDotW = total * dotR*2 + (total-1) * (dotGap - dotR*2);
+  const dotX0 = (W - totalDotW) / 2;
+  for (let i = 0; i < total; i++) {
+    ctx.beginPath();
+    ctx.arc(dotX0 + i * dotGap + dotR, H - 44, dotR, 0, Math.PI*2);
+    ctx.fillStyle = i === idx ? t.accent : t.accent + '40';
+    ctx.fill();
+  }
+
+  // Progress bar bottom
+  ctx.fillStyle = t.accent + '30';
+  ctx.fillRect(0, H-6, W, 6);
+  ctx.fillStyle = t.accent;
+  ctx.fillRect(0, H-6, W * ((idx + progress) / total), 6);
+
+  // Branding bottom-right
+  ctx.font = `600 22px ${textFont}, sans-serif`;
+  ctx.fillStyle = t.accent + '80';
+  ctx.textAlign = 'right';
+  ctx.fillText('Automation With Hadi', W - 44, H - 56);
+  ctx.textAlign = 'left';
+
+  // Slide number top-right
+  ctx.font = `400 20px ${textFont}, sans-serif`;
+  ctx.fillStyle = t.accent + '70';
+  ctx.textAlign = 'right';
+  ctx.fillText(`${idx+1} / ${total}`, W-44, 60);
+  ctx.textAlign = 'left';
+
+  // Emoji
+  ctx.font = '96px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(slide.emoji || '✨', W/2, 200);
+
+  // Title
+  ctx.font = `bold 64px ${textFont}, sans-serif`;
+  ctx.fillStyle = t.accent;
+  ctx.textAlign = 'center';
+  ctx.shadowColor = t.accent;
+  ctx.shadowBlur = 20;
+  wrapText(ctx, slide.title || '', W/2, 300, W - 160, 76);
+  ctx.shadowBlur = 0;
+
+  // Body
+  ctx.font = `400 32px Rajdhani, sans-serif`;
+  ctx.fillStyle = t.text + 'cc';
+  ctx.textAlign = 'center';
+  wrapText(ctx, slide.body || '', W/2, 430, W - 200, 42);
+}
+
+function wrapText(ctx, text, x, y, maxW, lineH) {
+  const words = text.split(' ');
+  let line = '', lines = [];
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && line) {
+      lines.push(line);
+      line = w;
+    } else { line = test; }
+  }
+  if (line) lines.push(line);
+  const startY = y - ((lines.length-1) * lineH) / 2;
+  lines.forEach((l,i) => ctx.fillText(l, x, startY + i * lineH));
+}
+
+// PLAYBACK
+let textRAF = null;
+let textStartTS = null;
+
+function playVideo() {
+  if (textSlides.length === 0) return;
+  if (textPlaying) return;
+  textPlaying = true;
+  if (textCurrentSlide >= textSlides.length) textCurrentSlide = 0;
+  textStartTS = performance.now() - textCurrentSlide * textSlideDur * 1000;
+  textAnimateLoop();
+}
+
+function textAnimateLoop(ts) {
+  if (!textPlaying) return;
+  ts = ts || performance.now();
+  const elapsed = (ts - textStartTS) / 1000;
+  const slideIdx = Math.floor(elapsed / textSlideDur);
+  if (slideIdx >= textSlides.length) { textPlaying = false; textCurrentSlide = 0; return; }
+  const progress = (elapsed % textSlideDur) / textSlideDur;
+  textCurrentSlide = slideIdx;
+  renderTextSlide(document.getElementById('videoCanvas'), slideIdx, progress);
+  textRAF = requestAnimationFrame(textAnimateLoop);
+}
+
+function pauseVideo() { textPlaying = false; cancelAnimationFrame(textRAF); }
+function restartVideo() { textCurrentSlide = 0; textPlaying = false; cancelAnimationFrame(textRAF); playVideo(); }
+
+// ══════════════════════════════════════
+// IMAGE → VIDEO LOGIC
+// ══════════════════════════════════════
+let imgFiles = [];
+let imgObjects = [];
+let imgCaptions = [];
+let imgPlaying = false;
+let imgRAF = null;
+let imgStartTS = null;
+let imgCurrentSlide = 0;
+let imgDur = 4;
+let imgTransition = 'fade';
+
+function handleImages(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(f => {
+    if (imgFiles.find(x => x.name === f.name)) return;
+    imgFiles.push(f);
+    const url = URL.createObjectURL(f);
+    const thumb = document.createElement('div');
+    thumb.className = 'img-thumb';
+    thumb.innerHTML = `<img src="${url}"><button class="remove" onclick="removeImg(this,'${f.name}')">×</button>`;
+    document.getElementById('imageGrid').appendChild(thumb);
+    const img = new Image();
+    img.src = url;
+    imgObjects.push(img);
+  });
+}
+
+function removeImg(btn, name) {
+  const idx = imgFiles.findIndex(f => f.name === name);
+  if (idx !== -1) { imgFiles.splice(idx, 1); imgObjects.splice(idx, 1); }
+  btn.closest('.img-thumb').remove();
+}
+
+async function generateImageVideo() {
+  if (imgFiles.length === 0) { showAlert('imgAlert', 'Please upload at least one image!', 'error'); return; }
+  const key = getKey();
+  const btn = document.getElementById('genImgBtn');
+  btn.disabled = true; btn.classList.add('loading');
+  document.getElementById('imgLog').innerHTML = '';
+  document.getElementById('imgOutput').style.display = 'none';
+  imgDur = parseInt(document.getElementById('imgDuration').value);
+  imgTransition = document.getElementById('transitionType').value;
+
+  try {
+    setProgress('imgProgress', 'imgProgressWrap', 'imgProgressLabel', 10, 'Loading images...');
+    log('imgLog', `Loading ${imgFiles.length} images...`);
+
+    // Wait for all images to load
+    await Promise.all(imgObjects.map(img => new Promise(r => { if(img.complete) r(); else img.onload = r; })));
+    log('imgLog', '✓ All images loaded');
+    setProgress('imgProgress', 'imgProgressWrap', 'imgProgressLabel', 30, 'Generating captions...');
+
+    const captionTopic = document.getElementById('imgCaption').value.trim();
+    if (captionTopic && key) {
+      log('imgLog', 'Generating captions with Groq AI...');
+      try {
+        const prompt = `Generate short caption text for ${imgFiles.length} images for the topic: "${captionTopic}". Return only a JSON array of ${imgFiles.length} short strings (max 8 words each). No markdown, no code blocks.`;
+        const raw = await callGroq(prompt, key);
+        const cleaned = raw.trim().replace(/```json?\n?/g,'').replace(/```\n?/g,'');
+        const s = cleaned.indexOf('['), e2 = cleaned.lastIndexOf(']');
+        if (s !== -1) {
+          imgCaptions = JSON.parse(cleaned.slice(s, e2+1));
+          log('imgLog', '✓ Captions generated');
+        }
+      } catch(e) {
+        log('imgLog', '⚠ Caption generation skipped: ' + e.message);
+        imgCaptions = imgFiles.map((_,i) => `Slide ${i+1}`);
+      }
+    } else {
+      imgCaptions = imgFiles.map((_,i) => captionTopic || `Slide ${i+1}`);
+    }
+
+    setProgress('imgProgress', 'imgProgressWrap', 'imgProgressLabel', 80, 'Rendering canvas...');
+    document.getElementById('imgOutput').style.display = 'block';
+    imgCurrentSlide = 0; imgPlaying = false;
+
+    const canvas = document.getElementById('imgCanvas');
+    renderImgSlide(canvas, 0, 0);
+    log('imgLog', '✓ Video ready!');
+    setProgress('imgProgress', 'imgProgressWrap', 'imgProgressLabel', 100, 'Done! Press Play.');
+    showAlert('imgAlert', '✅ Video ready! Press Play or Download.', 'success');
+
+  } catch(e) {
+    log('imgLog', '✗ Error: ' + e.message);
+    showAlert('imgAlert', '❌ Error: ' + e.message, 'error');
+  }
+
+  btn.disabled = false; btn.classList.remove('loading');
+}
+
+function renderImgSlide(canvas, idx, progress) {
+  if (!imgObjects[idx]) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+
+  const img = imgObjects[idx];
+  const nextImg = imgObjects[(idx+1) % imgObjects.length];
+  const t = imgTransition;
+
+  // Draw current image with cover fit
+  function drawImg(image, alpha, offsetX = 0, scale = 1) {
+    const iAsp = image.width / image.height;
+    const cAsp = W / H;
+    let sw, sh, sx, sy;
+    if (iAsp > cAsp) { sh = H; sw = H * iAsp; sy = 0; sx = (W - sw) / 2; }
+    else { sw = W; sh = W / iAsp; sx = 0; sy = (H - sh) / 2; }
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (scale !== 1) {
+      ctx.translate(W/2, H/2);
+      ctx.scale(scale, scale);
+      ctx.translate(-W/2, -H/2);
+    }
+    ctx.drawImage(image, sx + offsetX, sy, sw, sh);
+    ctx.restore();
+  }
+
+  const transThresh = 0.7; // last 30% of slide = transition
+  if (progress > transThresh && nextImg && t !== 'none') {
+    const tp = (progress - transThresh) / (1 - transThresh); // 0→1 during transition
+    if (t === 'fade') {
+      drawImg(img, 1);
+      drawImg(nextImg, tp);
+    } else if (t === 'slide') {
+      drawImg(img, 1, -tp * W);
+      drawImg(nextImg, 1, W - tp * W);
+    } else if (t === 'zoom') {
+      drawImg(img, 1, 0, 1 + tp * 0.1);
+      drawImg(nextImg, tp);
+    }
+  } else {
+    if (t === 'zoom') drawImg(img, 1, 0, 1 + progress * 0.05);
+    else drawImg(img, 1);
+  }
+
+  // Gradient overlay at bottom
+  const grd = ctx.createLinearGradient(0, H*0.55, 0, H);
+  grd.addColorStop(0, 'rgba(0,0,0,0)');
+  grd.addColorStop(1, 'rgba(0,0,0,0.75)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, W, H);
+
+  // Caption
+  const caption = imgCaptions[idx] || '';
+  if (caption) {
+    ctx.font = 'bold 42px Orbitron, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 12;
+    ctx.fillText(caption, W/2, H - 100);
+    ctx.shadowBlur = 0;
+  }
+
+  // Slide counter
+  ctx.font = '22px Rajdhani, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.textAlign = 'right';
+  ctx.fillText(`${idx+1} / ${imgObjects.length}`, W-40, 50);
+
+  // Branding
+  ctx.font = '600 22px Rajdhani, sans-serif';
+  ctx.fillStyle = 'rgba(0,212,255,0.8)';
+  ctx.textAlign = 'left';
+  ctx.fillText('Automation With Hadi', 40, H - 40);
+  ctx.textAlign = 'left';
+
+  // Progress bar
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.fillRect(0, H-5, W, 5);
+  ctx.fillStyle = '#00d4ff';
+  ctx.fillRect(0, H-5, W * ((idx + progress) / imgObjects.length), 5);
+}
+
+function playImgVideo() {
+  if (imgObjects.length === 0) return;
+  if (imgPlaying) return;
+  imgPlaying = true;
+  if (imgCurrentSlide >= imgObjects.length) imgCurrentSlide = 0;
+  imgStartTS = performance.now() - imgCurrentSlide * imgDur * 1000;
+  imgAnimLoop();
+}
+
+function imgAnimLoop(ts) {
+  if (!imgPlaying) return;
+  ts = ts || performance.now();
+  const elapsed = (ts - imgStartTS) / 1000;
+  const idx = Math.floor(elapsed / imgDur);
+  if (idx >= imgObjects.length) { imgPlaying = false; return; }
+  const progress = (elapsed % imgDur) / imgDur;
+  imgCurrentSlide = idx;
+  renderImgSlide(document.getElementById('imgCanvas'), idx, progress);
+  imgRAF = requestAnimationFrame(imgAnimLoop);
+}
+
+function pauseImgVideo() { imgPlaying = false; cancelAnimationFrame(imgRAF); }
+function restartImgVideo() { imgCurrentSlide = 0; imgPlaying = false; cancelAnimationFrame(imgRAF); playImgVideo(); }
+
+// ══════════════════════════════════════
+// DOWNLOAD VIDEO (MediaRecorder)
+// ══════════════════════════════════════
+async function downloadVideo(type) {
+  const isText = type === 'text';
+  const canvas = document.getElementById(isText ? 'videoCanvas' : 'imgCanvas');
+  const totalSlides = isText ? textSlides.length : imgObjects.length;
+  const dur = isText ? textSlideDur : imgDur;
+
+  if (totalSlides === 0) { alert('Generate a video first!'); return; }
+
+  // Stop any playing
+  if (isText) { textPlaying = false; cancelAnimationFrame(textRAF); }
+  else { imgPlaying = false; cancelAnimationFrame(imgRAF); }
+
+  const btn = event.target;
+  btn.textContent = '⏳ Recording...';
+  btn.disabled = true;
+
+  const stream = canvas.captureStream(30);
+  const mimeType = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+  const recorder = new MediaRecorder(stream, { mimeType });
+  const chunks = [];
+  recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `automation-with-hadi-${Date.now()}.webm`;
+    a.click();
+    URL.revokeObjectURL(url);
+    btn.textContent = '⬇ Download Video';
+    btn.disabled = false;
+  };
+
+  recorder.start();
+
+  // Play through all slides for recording
+  let slideIdx = 0;
+  const fps = 30;
+  const totalFrames = Math.round(dur * fps);
+  let frame = 0;
+
+  function recordFrame() {
+    if (slideIdx >= totalSlides) { recorder.stop(); return; }
+    const progress = frame / totalFrames;
+    if (isText) renderTextSlide(canvas, slideIdx, progress);
+    else renderImgSlide(canvas, slideIdx, progress);
+    frame++;
+    if (frame >= totalFrames) { frame = 0; slideIdx++; }
+    setTimeout(recordFrame, 1000 / fps);
+  }
+
+  recordFrame();
+}
+
+// DRAG & DROP on upload
+const ua = document.getElementById('uploadArea');
+ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('drag-over'); });
+ua.addEventListener('dragleave', () => ua.classList.remove('drag-over'));
+ua.addEventListener('drop', e => {
+  e.preventDefault(); ua.classList.remove('drag-over');
+  const dt = { target: { files: e.dataTransfer.files } };
+  handleImages(dt);
+});
+</script>
+</body>
+</html>
